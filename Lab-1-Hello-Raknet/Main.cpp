@@ -14,6 +14,8 @@ int main(void) {
 	printf("(C)lient or (S)erver? \n");
 	fgets(str, 512, stdin);
 
+	printf("Maximum number of clients? \n");
+
 	if ((str[0] == 'c') || (str[0] == 'C')) {
 		RakNet::SocketDescriptor sd;
 		pPeer->Startup(1, &sd, 1);
