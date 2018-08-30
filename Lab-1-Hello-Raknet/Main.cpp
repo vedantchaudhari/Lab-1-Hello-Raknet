@@ -18,6 +18,8 @@ int main(void) {
 		RakNet::SocketDescriptor sd;
 		pPeer->Startup(1, &sd, 1);
 		isServer = false;
+
+		// NEW LINE CHARACTER, ENTER DEFAULT IP ADDRESS
 	}
 	else {
 		RakNet::SocketDescriptor sd(SERVER_PORT, 0);
