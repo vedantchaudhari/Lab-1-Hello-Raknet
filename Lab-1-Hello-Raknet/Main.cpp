@@ -14,7 +14,8 @@ int main(void) {
 	printf("(C)lient or (S)erver? \n");
 	fgets(str, 512, stdin);
 
-	printf("Maximum number of clients? \n");
+	printf("What is the server port? \n");
+	scanf("%hu", &SERVER_PORT);
 
 	if ((str[0] == 'c') || (str[0] == 'C')) {
 		RakNet::SocketDescriptor sd;
@@ -24,10 +25,15 @@ int main(void) {
 		// NEW LINE CHARACTER, ENTER DEFAULT IP ADDRESS
 	}
 	else {
+		printf("Maximum number of clients? \n");
+		scanf("%d", &MAX_CLIENTS);
+
 		RakNet::SocketDescriptor sd(SERVER_PORT, 0);
 		pPeer->Startup(MAX_CLIENTS, &sd, 1);
 		isServer = true;
 	}
+
+	//while (1) {}
 
 	RakNet::RakPeerInterface::DestroyInstance(pPeer);
 
