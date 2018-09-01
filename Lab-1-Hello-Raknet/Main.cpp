@@ -1,8 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "RakNet/BitStream.h"
 #include "RakNet/MessageIdentifiers.h"
+#include "RakNet/RakNetTypes.h"
 #include "RakNet/RakPeerInterface.h"
+
+enum Messages {
+	ID_HELLO_MESSAGE = ID_USER_PACKET_ENUM + 1,
+	ID_BYE_MESSAGE = ID_USER_PACKET_ENUM + 2
+};
 
 int main(void) {
 	char str[512];
@@ -69,8 +76,17 @@ int main(void) {
 				printf("A client has connected. \n");
 				break;
 			case ID_CONNECTION_REQUEST_ACCEPTED:
+			{
 				printf("Connected to server. \n");
+
+				// Use a bistream to write a custom user message
+				RakNet::BitStream bsOut;
+				bsOut.Write((RakNet::MessageID)ID_HELLO_MESSAGE);
+				bsOut.Write("Hello World!");
+
+				pPeer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pPacket->systemAddress, false);
 				break;
+			}
 			case ID_NEW_INCOMING_CONNECTION:
 				break;
 			case ID_NO_FREE_INCOMING_CONNECTIONS:
@@ -92,6 +108,15 @@ int main(void) {
 					printf("Server has lost connection. \n");
 				}
 				break;
+			case ID_HELLO_MESSAGE:
+			{
+				RakNet::RakString rs;
+				RakNet::BitStream bsIn(pPacket->data, pPacket->length, false);
+				bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+				bsIn.Read(rs);
+				printf("%s \n", rs.C_String());
+				break;
+			}
 			default:
 				printf("Message with identifier %i has arrived. \n", pPacket->data[0]);
 				break;
