@@ -6,10 +6,37 @@
 #include "RakNet/RakNetTypes.h"
 #include "RakNet/RakPeerInterface.h"
 
+#pragma pack(push, 1)
+struct MessagePacket {
+	unsigned char typeID;
+	char str[256] = "Hello Mate";
+};
+#pragma pack(pop)
+
 enum Messages {
 	ID_HELLO_MESSAGE = ID_USER_PACKET_ENUM + 1,
 	ID_BYE_MESSAGE = ID_USER_PACKET_ENUM + 2
 };
+
+unsigned char getPacketID(RakNet::Packet* pPacket) {
+	if ((unsigned char)pPacket->data[0] == ID_TIMESTAMP) {
+		return (unsigned char)pPacket->data[sizeof(unsigned char) + sizeof(unsigned long)];
+	}
+	else {
+		return (unsigned char)pPacket->data[0];
+	}
+}
+
+void handleMsgPacket(RakNet::Packet* pPacket) {
+	MessagePacket* pMsg = (MessagePacket*)pPacket->data;
+	assert(pPacket->length != sizeof(MessagePacket));
+
+	if (pPacket->length != sizeof(MessagePacket))
+		return;
+
+	// Perform functionality for this packet here
+	printf("%s", pMsg->str);
+}
 
 int main(void) {
 	char str[512];
