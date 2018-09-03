@@ -161,8 +161,16 @@ int main(void) {
 			}
 			case ID_BYE_MESSAGE:
 			{
-				MessagePacket* pMsg = (MessagePacket*)pPacket->data;
-				printf("%s", pMsg->str);
+				MessagePacket* pMsgRec = (MessagePacket*)pPacket->data;
+				printf("%s", pMsgRec->str);
+
+				// Send a Hello Message
+				MessagePacket pMsg[1];
+				pMsg->typeID = ID_HELLO_MESSAGE;
+				strcpy(pMsg->str, "Hello Server");
+				pPeer->Send((char*)pMsg, sizeof(MessagePacket), HIGH_PRIORITY, RELIABLE, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
+
+
 				break;
 			}
 			default:
