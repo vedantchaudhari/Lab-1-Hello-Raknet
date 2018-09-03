@@ -1,3 +1,16 @@
+// Certificate of Authenticity
+//
+// EGP-405-01 Networking for Online Games
+// Lab 1
+// 7-30-2018
+//
+// Vedant Chaudhari, 1532077
+//
+// We certify that this work is entirely our own.The assessor of this project may reproduce this project 
+// and provide copies to other academic staff, and/or communicate a copy of this project to a plagiarism 
+// - checking service, which may retain a copy of the project on its database.
+
+
 #include <stdio.h>
 #include <string.h>
 
@@ -128,16 +141,28 @@ int main(void) {
 				//handleMsgPacket(pPacket);
 				//printf("received hello msg packet");
 
-				MessagePacket* pMsg = (MessagePacket*)pPacket->data;
+				MessagePacket* pMsgRec = (MessagePacket*)pPacket->data;
 				//assert(pPacket->length != sizeof(MessagePacket));
 
 				//if (pPacket->length != sizeof(MessagePacket))
 				//	return;
 
 				// Perform functionality for this packet here
-				printf("%s", pMsg->str);
+				printf("%s", pMsgRec->str);
 				//printf("Success");
 
+				// Send a Bye Message
+				MessagePacket pMsg[1];
+				pMsg->typeID = ID_BYE_MESSAGE;
+				strcpy(pMsg->str, "Bye Client");
+				pPeer->Send((char*)pMsg, sizeof(MessagePacket), HIGH_PRIORITY, RELIABLE, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
+
+				break;
+			}
+			case ID_BYE_MESSAGE:
+			{
+				MessagePacket* pMsg = (MessagePacket*)pPacket->data;
+				printf("%s", pMsg->str);
 				break;
 			}
 			default:
