@@ -9,13 +9,13 @@
 #pragma pack(push, 1)
 struct MessagePacket {
 	unsigned char typeID;
-	char str[256] = "Hello Mate";
+	char str[16];
 };
 #pragma pack(pop)
 
 enum Messages {
 	ID_HELLO_MESSAGE = ID_USER_PACKET_ENUM + 1,
-	ID_BYE_MESSAGE = ID_USER_PACKET_ENUM + 2
+	ID_BYE_MESSAGE
 };
 
 unsigned char getPacketID(RakNet::Packet* pPacket) {
@@ -36,6 +36,7 @@ void handleMsgPacket(RakNet::Packet* pPacket) {
 
 	// Perform functionality for this packet here
 	printf("%s", pMsg->str);
+	printf("Success");
 }
 
 int main(void) {
@@ -54,6 +55,7 @@ int main(void) {
 	printf("What is the server port? \n");
 	scanf("%hu", &SERVER_PORT);
 
+	// Evidence of UDP
 	if ((str[0] == 'c') || (str[0] == 'C')) {
 		RakNet::SocketDescriptor sd;
 		pPeer->Startup(1, &sd, 1);
@@ -64,7 +66,7 @@ int main(void) {
 	else {
 		printf("Maximum number of clients? \n");
 		scanf("%d", &MAX_CLIENTS);
-
+	
 		RakNet::SocketDescriptor sd(SERVER_PORT, 0);
 		pPeer->Startup(MAX_CLIENTS, &sd, 1);
 		isServer = true;
@@ -88,6 +90,10 @@ int main(void) {
 
 		printf("Initializing the client... \n");
 		pPeer->Connect(str, SERVER_PORT, 0, 0);
+
+		
+		
+		printf("sending message packet \n");
 	}
 
 	while (1) {
@@ -106,13 +112,18 @@ int main(void) {
 			{
 				printf("Connected to server. \n");
 
-				// Use a bistream to write a custom user message
-				RakNet::BitStream bsOut;
-				bsOut.Write((RakNet::MessageID)ID_HELLO_MESSAGE);
-				bsOut.Write("Hello World!");
+				MessagePacket* pMsg = new MessagePacket;
+				pMsg->typeID = ID_HELLO_MESSAGE;
+				strcpy(pMsg->str, "hello");
+				pPeer->Send((char*)pMsg, sizeof(pMsg), HIGH_PRIORITY, RELIABLE, 0, pPacket->systemAddress, true);
 
-				pPeer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pPacket->systemAddress, false);
-				break;
+				// Use a bistream to write a custom user message
+				//RakNet::BitStream bsOut;
+				//bsOut.Write((RakNet::MessageID)ID_HELLO_MESSAGE);
+				//bsOut.Write("Hello World!");
+
+				//pPeer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pPacket->systemAddress, false);
+			  	break;
 			}
 			case ID_NEW_INCOMING_CONNECTION:
 				break;
@@ -137,11 +148,13 @@ int main(void) {
 				break;
 			case ID_HELLO_MESSAGE:
 			{
-				RakNet::RakString rs;
-				RakNet::BitStream bsIn(pPacket->data, pPacket->length, false);
-				bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
-				bsIn.Read(rs);
-				printf("%s \n", rs.C_String());
+				//MessagePacket* pMsg = new MessagePacket;
+				//pMsg->typeID = ID_HELLO_MESSAGE;
+				//pPeer->Send((char*)pMsg, sizeof(pMsg), HIGH_PRIORITY, RELIABLE, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
+
+				handleMsgPacket(pPacket);
+				printf("received hello msg packet");
+
 				break;
 			}
 			default:
@@ -149,6 +162,17 @@ int main(void) {
 				break;
 			}
 		}
+
+		// Send Packets Here
+		/*
+			{
+				MessagePacket* pMsg = new MessagePacket;
+				pMsg->typeID = ID_HELLO_MESSAGE;
+				pPeer->Send((char*)pMsg, sizeof(pMsg), HIGH_PRIORITY, RELIABLE, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
+
+				break;
+			}
+		*/
 	}
 
 	RakNet::RakPeerInterface::DestroyInstance(pPeer);
