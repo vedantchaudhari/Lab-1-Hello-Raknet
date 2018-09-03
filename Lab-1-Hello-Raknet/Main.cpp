@@ -82,7 +82,7 @@ int main(void) {
 	else {
 		printf("Enter server IP or enter for localhost \n");
 		fgets(str, 512, stdin);
-		strcpy(str, "127.0.0.1");
+		//strcpy(str, "127.0.0.1");
 
 		if (str[0] == '\n') {
 			strcpy(str, "127.0.0.1");
@@ -93,7 +93,7 @@ int main(void) {
 
 		
 		
-		printf("sending message packet \n");
+		//printf("sending message packet \n");
 	}
 
 	while (1) {
@@ -112,10 +112,10 @@ int main(void) {
 			{
 				printf("Connected to server. \n");
 
-				MessagePacket* pMsg = new MessagePacket;
+				MessagePacket pMsg[1];
 				pMsg->typeID = ID_HELLO_MESSAGE;
 				strcpy(pMsg->str, "hello");
-				pPeer->Send((char*)pMsg, sizeof(pMsg), HIGH_PRIORITY, RELIABLE, 0, pPacket->systemAddress, true);
+				pPeer->Send((char*)pMsg, sizeof(MessagePacket), HIGH_PRIORITY, RELIABLE, 0, pPacket->systemAddress, true);
 
 				// Use a bistream to write a custom user message
 				//RakNet::BitStream bsOut;
@@ -152,8 +152,18 @@ int main(void) {
 				//pMsg->typeID = ID_HELLO_MESSAGE;
 				//pPeer->Send((char*)pMsg, sizeof(pMsg), HIGH_PRIORITY, RELIABLE, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 
-				handleMsgPacket(pPacket);
-				printf("received hello msg packet");
+				//handleMsgPacket(pPacket);
+				//printf("received hello msg packet");
+
+				MessagePacket* pMsg = (MessagePacket*)pPacket->data;
+				//assert(pPacket->length != sizeof(MessagePacket));
+
+				//if (pPacket->length != sizeof(MessagePacket))
+				//	return;
+
+				// Perform functionality for this packet here
+				printf("%s", pMsg->str);
+				//printf("Success");
 
 				break;
 			}
